@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A Flutter web app with IMG.LY integration">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="IMG.LY Flutter Demo">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>IMG.LY Flutter Integration</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- Container for the iframe -->
+  <div id="iframe-container" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; display: none; background: rgba(0,0,0,0.8);"></div>
+  
+  <script>
+    // Show/hide iframe functions
+    window.showImglyEditor = function() {
+      const container = document.getElementById('iframe-container');
+      if (container) {
+        container.style.display = 'block';
+      }
+    };
+    
+    window.hideImglyEditor = function() {
+      const container = document.getElementById('iframe-container');
+      if (container) {
+        container.style.display = 'none';
+      }
+    };
+  </script>
+
+  <!-- Load Flutter app directly -->
+  <script src="main.dart.js" type="application/javascript"></script>
+</body>
+</html>

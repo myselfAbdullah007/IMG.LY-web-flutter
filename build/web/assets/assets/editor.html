@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>img.ly Editor</title>
+    <script src="https://cdn.img.ly/packages/imgly/cesdk-js/1.19.0/cesdk.umd.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #cesdk_container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesdk_container"></div>
+    <script>
+        let cesdk;
+        
+        // Initialize the CreativeEditor SDK
+        window.initCESDK = function(config) {
+            window.CESDK.default.create('#cesdk_container', config).then(instance => {
+                cesdk = instance;
+                window.parent.postMessage({ type: 'cesdk_ready' }, '*');
+            }).catch(error => {
+                window.parent.postMessage({ type: 'cesdk_error', error: error.message }, '*');
+            });
+        };
+
+        // Function to load an image
+        window.loadImage = function(imageUrl) {
+            if (cesdk) {
+                cesdk.loadImage(imageUrl).then(() => {
+                    window.parent.postMessage({ type: 'image_loaded' }, '*');
+                }).catch(error => {
+                    window.parent.postMessage({ type: 'image_error', error: error.message }, '*');
+                });
+            }
+        };
+
+        // Function to export the edited image
+        window.exportImage = function() {
+            if (cesdk) {
+                cesdk.export().then(result => {
+                    window.parent.postMessage({ 
+                        type: 'export_complete', 
+                        data: result.data 
+                    }, '*');
+                }).catch(error => {
+                    window.parent.postMessage({ 
+                        type: 'export_error', 
+                        error: error.message 
+                    }, '*');
+                });
+            }
+        };
+
+        // Listen for messages from Flutter
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (!data || !data.type) return;
+
+            switch (data.type) {
+                case 'loadImage':
+                    window.loadImage(data.url);
+                    break;
+                case 'exportImage':
+                    window.exportImage();
+                    break;
+            }
+        });
+
+        // Initialize with default config
+        const defaultConfig = {
+            license: 'MC-wl_23-QB_XIcrJ8DP-B2r2liJxmPr4_OHWNt7Y38Vx9on5QkjtyB0rbR5Ny_m', // Add your img.ly license here
+            ui: {
+                elements: {
+                    navigation: {
+                        show: true,
+                        position: 'bottom'
+                    }
+                }
+            }
+        };
+
+        window.initCESDK(defaultConfig);
+    </script>
+</body>
+</html> 
