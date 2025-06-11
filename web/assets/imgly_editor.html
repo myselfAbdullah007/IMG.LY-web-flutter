@@ -1,734 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMG.LY Editor</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 100%;
-            height: 100vh;
-            background: white;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            padding: 15px 20px;
-            position: relative;
-            flex-shrink: 0;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .close-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .editor-container {
-            flex: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: #6366f1;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5855eb;
-            transform: translateY(-1px);
-        }
-        
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-        
-        .btn-secondary:hover {
-            background: #d1d5db;
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .status {
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        
-        .status.loading {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status.ready {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status.error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        #editor {
-            flex: 1;
-            border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f9fafb;
-            min-height: 400px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .placeholder {
-            text-align: center;
-            color: #6b7280;
-        }
-        
-        .placeholder svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-        
-        .canvas-editor {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .canvas-controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        #fallbackCanvas {
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: crosshair;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .trial-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 6px;
-        }
-        
-        .trial-info h3 {
-            margin-top: 0;
-            color: #92400e;
-        }
-        
-        .trial-info p {
-            margin-bottom: 10px;
-            color: #92400e;
-        }
-        
-        .trial-info code {
-            display: block;
-            padding: 8px;
-            background: #fffbeb;
-            border-radius: 4px;
-            font-family: monospace;
-            margin-bottom: 10px;
-            overflow-wrap: break-word;
-        }
-        
-        .trial-info a {
-            color: #d97706;
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>IMG.LY Editor</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    #editor {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <button class="close-btn" onclick="closeEditor()">&times;</button>
-            <h2 style="margin: 0;">IMG.LY Photo Editor (Trial)</h2>
-            <p style="margin: 5px 0 0 0; opacity: 0.9;">Testing with trial license</p>
-        </div>
-        
-        <div class="editor-container">
-            <div id="status" class="status loading">
-                🔄 Initializing Image Editor...
-            </div>
-            
-            <div class="controls">
-                <button id="openEditorBtn" class="btn btn-primary" disabled>
-                    📝 Create New Design
-                </button>
-                <button id="loadSampleBtn" class="btn btn-secondary" disabled>
-                    🖼️ Load Sample Image
-                </button>
-                <button id="uploadBtn" class="btn btn-secondary" disabled>
-                    📁 Upload Image
-                </button>
-                <button id="tryTrialBtn" class="btn btn-secondary" onclick="tryTrialSetup()">
-                    🧪 Try Trial Setup
-                </button>
-            </div>
-            
-            <div id="editor">
-                <div class="placeholder">
-                    <svg fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                    </svg>
-                    <h3>Image Editor</h3>
-                    <p>Click a button above to start editing</p>
-                </div>
-            </div>
-            
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-            
-            <div id="trial-info" class="trial-info">
-                <h3>🧪 IMG.LY Trial License Setup</h3>
-                <p><strong>Trial License Limitations:</strong></p>
-                <ul>
-                    <li>Trial licenses often work only on specific domains (like img.ly's demo domains)</li>
-                    <li>May not work on localhost or custom domains</li>
-                    <li>Usually have time limitations (30 days)</li>
-                    <li>May include watermarks on exported images</li>
-                </ul>
-                
-                <p><strong>To test with trial license:</strong></p>
-                <ol>
-                    <li><strong>Option 1:</strong> Deploy to a public domain (Vercel, Netlify, GitHub Pages)</li>
-                    <li><strong>Option 2:</strong> Use IMG.LY's online demo environment</li>
-                    <li><strong>Option 3:</strong> Request a development license from IMG.LY</li>
-                </ol>
-                
-                <p><strong>Quick Deploy Options:</strong></p>
-                <ul>
-                    <li><a href="https://vercel.com" target="_blank">Vercel</a> - Free hosting with custom domains</li>
-                    <li><a href="https://netlify.com" target="_blank">Netlify</a> - Free hosting with drag & drop</li>
-                    <li><a href="https://pages.github.com" target="_blank">GitHub Pages</a> - Free hosting from GitHub</li>
-                </ul>
-                
-                <p><strong>Your trial license:</strong></p>
-                <code>MC-wl_23-QB_XIcrJ8DP-B2r2liJxmPr4_OHWNt7Y38Vx9on5QkjtyB0rbR5Ny_m</code>
-                
-                <p>For now, the fallback editor provides full functionality for development and testing!</p>
-            </div>
-        </div>
-    </div>
+  <div id="editor"></div>
 
-    <script>
-        let editor = null;
-        let isEditorReady = false;
-        let currentCanvas = null;
-        let currentContext = null;
-        let isDrawing = false;
-        let currentColor = '#ff6b6b';
-        let currentTool = 'brush';
-        
-        // Close editor function
-        function closeEditor() {
-            if (window.parent && window.parent.hideImglyEditor) {
-                window.parent.hideImglyEditor();
-            }
-        }
-        
-        // Try trial setup with different approaches
-        async function tryTrialSetup() {
-            const statusEl = document.getElementById('status');
-            statusEl.className = 'status loading';
-            statusEl.textContent = '🧪 Trying trial license setup...';
-            
-            console.log('Attempting trial license setup...');
-            
-            // Try different trial approaches
-            const trialApproaches = [
-                {
-                    name: 'PhotoEditorSDK Trial',
-                    url: 'https://cdn.img.ly/packages/imgly/photoeditorsdk-html5/latest/photoeditorsdk.min.js',
-                    init: initPhotoEditorTrial
-                },
-                {
-                    name: 'CreativeEditorSDK Trial',
-                    url: 'https://cdn.img.ly/packages/imgly/cesdk-js/latest/index.umd.js',
-                    init: initCreativeEditorTrial
-                }
-            ];
-            
-            for (const approach of trialApproaches) {
-                try {
-                    console.log(`Trying ${approach.name}...`);
-                    await loadScript(approach.url);
-                    await approach.init();
-                    return; // Success!
-                } catch (error) {
-                    console.log(`${approach.name} failed:`, error.message);
-                }
-            }
-            
-            // All approaches failed, use fallback
-            console.log('All trial approaches failed, using fallback editor');
-            createFallbackEditor();
-            statusEl.className = 'status ready';
-            statusEl.textContent = '✅ Fallback Editor Ready (Trial license requires production domain)';
-            isEditorReady = true;
-            enableButtons();
-            notifyFlutter();
-        }
-        
-        function loadScript(url) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.onload = () => resolve();
-                script.onerror = () => reject(new Error(`Failed to load ${url}`));
-                document.head.appendChild(script);
-            });
-        }
-        
-        async function initPhotoEditorTrial() {
-            if (!window.PhotoEditorSDK) {
-                throw new Error('PhotoEditorSDK not available');
-            }
-            
-            const config = {
-                license: 'MC-wl_23-QB_XIcrJ8DP-B2r2liJxmPr4_OHWNt7Y38Vx9on5QkjtyB0rbR5Ny_m',
-                container: '#editor',
-                editor: {
-                    image: 'https://picsum.photos/800/600?random=1'
-                },
-                // Try without specifying assets URL for trial
-            };
-            
-            editor = new window.PhotoEditorSDK.UI.ReactUI(config);
-            
-            const statusEl = document.getElementById('status');
-            statusEl.className = 'status ready';
-            statusEl.textContent = '✅ IMG.LY PhotoEditorSDK Trial Ready';
-            isEditorReady = true;
-            enableButtons();
-            notifyFlutter();
-        }
-        
-        async function initCreativeEditorTrial() {
-            if (!window.CreativeEditorSDK) {
-                throw new Error('CreativeEditorSDK not available');
-            }
-            
-            const config = {
-                license: 'MC-wl_23-QB_XIcrJ8DP-B2r2liJxmPr4_OHWNt7Y38Vx9on5QkjtyB0rbR5Ny_m',
-                userId: 'trial-user-' + Date.now(),
-                // Try without specifying baseURL for trial
-            };
-            
-            editor = await window.CreativeEditorSDK.create('#editor', config);
-            
-            const statusEl = document.getElementById('status');
-            statusEl.className = 'status ready';
-            statusEl.textContent = '✅ IMG.LY CreativeEditorSDK Trial Ready';
-            isEditorReady = true;
-            enableButtons();
-            notifyFlutter();
-        }
-        
-        // Enhanced fallback editor with drawing capabilities
-        function createFallbackEditor() {
-            console.log('Creating enhanced fallback editor...');
-            
-            const editorContainer = document.getElementById('editor');
-            editorContainer.innerHTML = `
-                <div class="canvas-editor">
-                    <h3>🎨 Interactive Image Editor</h3>
-                    <p>Full-featured editor for development & testing</p>
-                    
-                    <div class="canvas-controls">
-                        <button onclick="setTool('brush')" class="btn btn-secondary" id="brushBtn">🖌️ Brush</button>
-                        <button onclick="setTool('eraser')" class="btn btn-secondary" id="eraserBtn">🧽 Eraser</button>
-                        <button onclick="clearCanvas()" class="btn btn-secondary">🗑️ Clear</button>
-                        <input type="color" value="#ff6b6b" onchange="setColor(this.value)" style="width: 40px; height: 32px; border: none; border-radius: 4px;">
-                        <button onclick="addText()" class="btn btn-secondary">📝 Add Text</button>
-                        <button onclick="addShape()" class="btn btn-secondary">🔴 Add Shape</button>
-                        <button onclick="exportImage()" class="btn btn-primary">💾 Save & Export</button>
-                    </div>
-                    
-                    <canvas id="fallbackCanvas" width="600" height="400"></canvas>
-                </div>
-            `;
-            
-            // Initialize canvas
-            currentCanvas = document.getElementById('fallbackCanvas');
-            currentContext = currentCanvas.getContext('2d');
-            
-            // Set up canvas
-            setupCanvas();
-            
-            // Add drawing functionality
-            setupDrawing();
-            
-            // Set initial tool
-            setTool('brush');
-        }
-        
-        function setupCanvas() {
-            // Create a nice background
-            const gradient = currentContext.createLinearGradient(0, 0, 600, 400);
-            gradient.addColorStop(0, '#f8fafc');
-            gradient.addColorStop(1, '#e2e8f0');
-            currentContext.fillStyle = gradient;
-            currentContext.fillRect(0, 0, 600, 400);
-            
-            // Add some initial content
-            currentContext.fillStyle = '#64748b';
-            currentContext.font = 'bold 24px Arial';
-            currentContext.textAlign = 'center';
-            currentContext.fillText('Interactive Canvas Editor', 300, 200);
-            
-            currentContext.font = '16px Arial';
-            currentContext.fillText('Use the tools above to draw and edit!', 300, 230);
-        }
-        
-        function setupDrawing() {
-            let lastX = 0;
-            let lastY = 0;
-            
-            function getMousePos(e) {
-                const rect = currentCanvas.getBoundingClientRect();
-                const scaleX = currentCanvas.width / rect.width;
-                const scaleY = currentCanvas.height / rect.height;
-                
-                return {
-                    x: (e.clientX - rect.left) * scaleX,
-                    y: (e.clientY - rect.top) * scaleY
-                };
-            }
-            
-            currentCanvas.addEventListener('mousedown', (e) => {
-                isDrawing = true;
-                const pos = getMousePos(e);
-                lastX = pos.x;
-                lastY = pos.y;
-            });
-            
-            currentCanvas.addEventListener('mousemove', (e) => {
-                if (!isDrawing) return;
-                
-                const pos = getMousePos(e);
-                
-                currentContext.beginPath();
-                currentContext.moveTo(lastX, lastY);
-                currentContext.lineTo(pos.x, pos.y);
-                
-                if (currentTool === 'brush') {
-                    currentContext.globalCompositeOperation = 'source-over';
-                    currentContext.strokeStyle = currentColor;
-                    currentContext.lineWidth = 3;
-                } else if (currentTool === 'eraser') {
-                    currentContext.globalCompositeOperation = 'destination-out';
-                    currentContext.lineWidth = 10;
-                }
-                
-                currentContext.lineCap = 'round';
-                currentContext.stroke();
-                
-                lastX = pos.x;
-                lastY = pos.y;
-            });
-            
-            currentCanvas.addEventListener('mouseup', () => {
-                isDrawing = false;
-            });
-            
-            currentCanvas.addEventListener('mouseout', () => {
-                isDrawing = false;
-            });
-        }
-        
-        function setTool(tool) {
-            currentTool = tool;
-            
-            // Update button styles
-            document.querySelectorAll('.canvas-controls .btn').forEach(btn => {
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn-secondary');
-            });
-            
-            if (tool === 'brush') {
-                document.getElementById('brushBtn').classList.remove('btn-secondary');
-                document.getElementById('brushBtn').classList.add('btn-primary');
-            } else if (tool === 'eraser') {
-                document.getElementById('eraserBtn').classList.remove('btn-secondary');
-                document.getElementById('eraserBtn').classList.add('btn-primary');
-            }
-        }
-        
-        function setColor(color) {
-            currentColor = color;
-        }
-        
-        function clearCanvas() {
-            setupCanvas();
-        }
-        
-        function addText() {
-            const text = prompt('Enter text to add:');
-            if (text) {
-                currentContext.fillStyle = currentColor;
-                currentContext.font = 'bold 20px Arial';
-                currentContext.textAlign = 'center';
-                currentContext.fillText(text, 300, 300);
-            }
-        }
-        
-        function addShape() {
-            // Add a circle shape
-            currentContext.beginPath();
-            currentContext.arc(300, 300, 30, 0, 2 * Math.PI);
-            currentContext.fillStyle = currentColor;
-            currentContext.fill();
-        }
-        
-        function exportImage() {
-            const dataUrl = currentCanvas.toDataURL('image/png');
-            
-            // Send to Flutter
-            if (window.parent && window.parent.flutterImageEdited) {
-                window.parent.flutterImageEdited(dataUrl);
-            }
-            
-            // Show success message
-            const statusEl = document.getElementById('status');
-            const originalText = statusEl.textContent;
-            const originalClass = statusEl.className;
-            
-            statusEl.className = 'status ready';
-            statusEl.textContent = '✅ Image exported successfully!';
-            
-            setTimeout(() => {
-                statusEl.textContent = originalText;
-                statusEl.className = originalClass;
-            }, 2000);
-        }
-        
-        // Load image into canvas
-        function loadImageToCanvas(imageSrc) {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = function() {
-                // Clear canvas and draw image
-                currentContext.clearRect(0, 0, 600, 400);
-                
-                // Calculate scaling to fit image in canvas
-                const scale = Math.min(600 / img.width, 400 / img.height);
-                const width = img.width * scale;
-                const height = img.height * scale;
-                const x = (600 - width) / 2;
-                const y = (400 - height) / 2;
-                
-                currentContext.drawImage(img, x, y, width, height);
-            };
-            img.src = imageSrc;
-        }
-        
-        // Initialize editor
-        async function initializeEditor() {
-            try {
-                const statusEl = document.getElementById('status');
-                statusEl.textContent = '🔄 Initializing trial editor...';
-                
-                console.log('Initializing editor for trial license...');
-                
-                // For trial, start with fallback editor
-                createFallbackEditor();
-                
-                statusEl.className = 'status ready';
-                statusEl.textContent = '✅ Fallback Editor Ready (Click "Try Trial Setup" to test IMG.LY SDK)';
-                isEditorReady = true;
-                
-                enableButtons();
-                notifyFlutter();
-                
-            } catch (error) {
-                console.log('Error during initialization:', error.message);
-                createFallbackEditor();
-                
-                const statusEl = document.getElementById('status');
-                statusEl.className = 'status ready';
-                statusEl.textContent = '✅ Fallback Editor Ready';
-                isEditorReady = true;
-                
-                enableButtons();
-                notifyFlutter();
-            }
-        }
-        
-        function enableButtons() {
-            document.getElementById('openEditorBtn').disabled = false;
-            document.getElementById('loadSampleBtn').disabled = false;
-            document.getElementById('uploadBtn').disabled = false;
-        }
-        
-        function notifyFlutter() {
-            if (window.parent && window.parent.flutterEditorLoaded) {
-                window.parent.flutterEditorLoaded();
-            }
-        }
+  <script>
+    const LICENSE_KEY = "//your licence key here";
+    let cesdkInstance = null;
 
-        // Update openEditor function
-        function openEditor(imageUrl = null) {
-            if (!isEditorReady) return;
-            
-            try {
-                console.log('Opening editor with imageUrl:', imageUrl || 'none');
-                
-                if (editor) {
-                    console.log('Using real IMG.LY SDK');
-                    
-                    // Handle different SDK types
-                    if (window.CreativeEditorSDK && editor.scene) {
-                        if (imageUrl) {
-                            editor.scene.loadFromURL(imageUrl);
-                        } else {
-                            editor.scene.createFromImage('https://picsum.photos/800/600');
-                        }
-                    } else if (window.PhotoEditorSDK) {
-                        if (imageUrl) {
-                            editor.loadImage(imageUrl);
-                        }
-                    }
-                } else {
-                    console.log('Using fallback editor');
-                    if (!currentCanvas) {
-                        createFallbackEditor();
-                    }
-                    
-                    if (imageUrl) {
-                        loadImageToCanvas(imageUrl);
-                    } else {
-                        setupCanvas();
-                    }
-                }
-            } catch (error) {
-                console.log('Error opening editor:', error.message);
-                createFallbackEditor();
-            }
-        }
-        
-        // Load a sample image
-        function loadSampleImage() {
-            const sampleImageUrl = 'https://picsum.photos/800/600?random=' + Math.floor(Math.random() * 1000);
-            console.log('Loading sample image:', sampleImageUrl);
-            openEditor(sampleImageUrl);
-        }
-        
-        // Handle file upload
-        function handleFileUpload() {
-            const fileInput = document.getElementById('fileInput');
-            fileInput.click();
-            
-            fileInput.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        openEditor(e.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-        }
-        
-        // Listen for messages from parent window
-        window.addEventListener('message', function(event) {
-            console.log('Message received from parent:', event.data);
-            
-            if (typeof event.data === 'string') {
-                switch (event.data) {
-                    case 'openEditor':
-                        console.log('Received openEditor command');
-                        openEditor();
-                        break;
-                    case 'loadSampleImage':
-                        console.log('Received loadSampleImage command');
-                        loadSampleImage();
-                        break;
-                    default:
-                        console.log('Unknown message:', event.data);
-                }
-            }
+    function loadCESDKScript(callback) {
+      const script = document.createElement("script");
+      script.src = "https://cdn.img.ly/packages/imgly/cesdk-js/1.x/cesdk.umd.js";
+      script.onload = callback;
+      script.onerror = () => {
+        alert("❌ Failed to load IMG.LY CESDK script.");
+        console.error("Failed to load CESDK script.");
+      };
+      document.head.appendChild(script);
+    }
+
+    async function initCESDK(imageUrl = null) {
+      try {
+        cesdkInstance = await window.CESDK.init({
+          license: LICENSE_KEY,
+          container: "#editor",
+          image: imageUrl || "https://cdn.img.ly/assets/example.jpg"
         });
-        
-        // Event listeners
-        document.getElementById('openEditorBtn').addEventListener('click', () => {
-            console.log('Open editor button clicked in iframe');
-            openEditor();
-        });
-        document.getElementById('loadSampleBtn').addEventListener('click', () => {
-            console.log('Load sample button clicked in iframe');
-            loadSampleImage();
-        });
-        document.getElementById('uploadBtn').addEventListener('click', handleFileUpload);
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initializeEditor);
-    </script>
+        console.log("✅ CESDK loaded");
+        window.parent?.flutterEditorLoaded?.();
+      } catch (e) {
+        console.error("❌ Failed to initialize CESDK:", e);
+      }
+    }
+
+    function loadSampleImage() {
+      const url = "https://picsum.photos/800/600?random=" + Math.floor(Math.random() * 1000);
+      if (cesdkInstance) {
+        cesdkInstance.loadFromURL(url);
+      } else {
+        initCESDK(url);
+      }
+    }
+
+    function openEditor() {
+      if (cesdkInstance) {
+        cesdkInstance.createFromImage("https://cdn.img.ly/assets/example.jpg");
+      } else {
+        initCESDK();
+      }
+    }
+
+    // Handle messages from Flutter
+    window.addEventListener("message", (event) => {
+      if (typeof event.data !== "string") return;
+      console.log("📩 Message from Flutter:", event.data);
+      switch (event.data) {
+        case "openEditor":
+          openEditor();
+          break;
+        case "loadSampleImage":
+          loadSampleImage();
+          break;
+        default:
+          console.warn("Unknown message:", event.data);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadCESDKScript(() => {
+        console.log("📦 CESDK script loaded");
+        initCESDK();
+      });
+    });
+  </script>
 </body>
 </html>
